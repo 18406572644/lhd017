@@ -2,7 +2,7 @@
 import { ref, watch, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import type { Medicine, MedicineCategory } from '@/types/medicine'
+import type { Medicine, MedicineCategory, MedicineTag } from '@/types/medicine'
 import { CATEGORY_LIST } from '@/types/medicine'
 import { getTodayString } from '@/utils/date'
 import ImageUpload from './ImageUpload.vue'
@@ -10,6 +10,7 @@ import ImageUpload from './ImageUpload.vue'
 interface Props {
   visible: boolean
   medicine?: Medicine | null
+  tags: MedicineTag[]
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -20,6 +21,7 @@ const emit = defineEmits<{
   (e: 'update:visible', value: boolean): void
   (e: 'save', data: Omit<Medicine, 'id' | 'createdAt' | 'updatedAt'>): void
   (e: 'update', id: string, data: Partial<Medicine>): void
+  (e: 'manageTags'): void
 }>()
 
 const formRef = ref<FormInstance>()
@@ -41,6 +43,7 @@ const formData = ref({
   usage: '',
   notes: '',
   image: '',
+  tagIds: [] as string[],
 })
 
 const rules: FormRules = {
@@ -77,6 +80,7 @@ watch(
         usage: props.medicine.usage,
         notes: props.medicine.notes,
         image: props.medicine.image || '',
+        tagIds: props.medicine.tagIds || [],
       }
     } else if (newVal) {
       resetForm()
@@ -102,8 +106,13 @@ const resetForm = () => {
     usage: '',
     notes: '',
     image: '',
+    tagIds: [],
   }
   formRef.value?.resetFields()
+}
+
+const handleManageTags = () => {
+  emit('manageTags')
 }
 
 const handleSubmit = async () => {
@@ -217,6 +226,43 @@ const handleSubmit = async () => {
               </el-form-item>
             </el-col>
           </el-row>
+
+          <el-form-item label="标签">
+            <div class="medicine-form__tags">
+              <el-select
+                v-model="formData.tagIds"
+                multiple
+                collapse-tags
+                collapse-tags-tooltip
+                placeholder="选择标签（可多选）"
+                style="width: 100%"
+                class="medicine-form__tag-select"
+              >
+                <el-option
+                  v-for="tag in tags"
+                  :key="tag.id"
+                  :label="tag.name"
+                  :value="tag.id"
+                >
+                  <div class="tag-option">
+                    <span
+                      class="tag-option__dot"
+                      :style="{ backgroundColor: tag.color }"
+                    />
+                    <span class="tag-option__name">{{ tag.name }}</span>
+                  </div>
+                </el-option>
+              </el-select>
+              <el-button
+                type="primary"
+                text
+                class="medicine-form__manage-tags-btn"
+                @click="handleManageTags"
+              >
+                管理标签
+              </el-button>
+            </div>
+          </el-form-item>
         </el-tab-pane>
 
         <el-tab-pane label="用药备注" name="notes">
@@ -305,6 +351,38 @@ const handleSubmit = async () => {
   :deep(.el-select__wrapper),
   :deep(.el-date-editor) {
     border-radius: var(--radius-md);
+  }
+
+  &__tags {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+  }
+
+  &__tag-select {
+    flex: 1;
+  }
+
+  &__manage-tags-btn {
+    flex-shrink: 0;
+  }
+}
+
+.tag-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  &__name {
+    font-size: 14px;
   }
 }
 </style>

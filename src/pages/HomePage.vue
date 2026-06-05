@@ -3,15 +3,20 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import { FirstAidKit, Reading } from '@element-plus/icons-vue'
-import type { Medicine } from '@/types/medicine'
+import type { Medicine, ExportOptions } from '@/types/medicine'
 import { useMedicine } from '@/composables/useMedicine'
+import { useTag } from '@/composables/useTag'
+import { exportMedicineData } from '@/utils/export'
 import StatsCard from '@/components/StatsCard.vue'
 import FilterBar from '@/components/FilterBar.vue'
 import MedicineCard from '@/components/MedicineCard.vue'
 import MedicineForm from '@/components/MedicineForm.vue'
 import MedicineDetail from '@/components/MedicineDetail.vue'
+import ExportDialog from '@/components/ExportDialog.vue'
+import TagManager from '@/components/TagManager.vue'
 
 const {
+  medicineList,
   filteredMedicineList,
   filterOptions,
   statistics,
@@ -22,8 +27,12 @@ const {
   resetFilter,
 } = useMedicine()
 
+const { tagList, loadTagList } = useTag()
+
 const showFormDialog = ref(false)
 const showDetailDialog = ref(false)
+const showExportDialog = ref(false)
+const showTagManager = ref(false)
 const editingMedicine = ref<Medicine | null>(null)
 const viewingMedicine = ref<Medicine | null>(null)
 
@@ -80,6 +89,40 @@ const handleSave = (data: Omit<Medicine, 'id' | 'createdAt' | 'updatedAt'>) => {
 const handleUpdate = (id: string, data: Partial<Medicine>) => {
   updateMedicine(id, data)
 }
+
+const handleExport = () => {
+  showExportDialog.value = true
+}
+
+const handleManageTags = () => {
+  showTagManager.value = true
+}
+
+const handleDoExport = (options: ExportOptions) => {
+  try {
+    exportMedicineData(medicineList.value, filteredMedicineList.value, options, tagList.value)
+    ElMessage.success('导出成功')
+  } catch (error) {
+    if (error instanceof Error) {
+      ElMessage.error(error.message)
+    } else {
+      ElMessage.error('导出失败')
+    }
+  }
+}
+
+const handleFormManageTags = () => {
+  showFormDialog.value = false
+  showTagManager.value = true
+}
+
+const handleTagManagerClose = (val: boolean) => {
+  if (!val) {
+    loadTagList()
+    showTagManager.value = false
+    showFormDialog.value = true
+  }
+}
 </script>
 
 <template>
@@ -116,9 +159,12 @@ const handleUpdate = (id: string, data: Partial<Medicine>) => {
 
       <FilterBar
         :filter-options="filterOptions"
+        :tags="tagList"
         @update:filter-options="setFilter"
         @reset="resetFilter"
         @add="handleAdd"
+        @export="handleExport"
+        @manage-tags="handleManageTags"
       />
 
       <div class="home-page__list-header">
@@ -136,6 +182,7 @@ const handleUpdate = (id: string, data: Partial<Medicine>) => {
           v-for="(medicine, index) in filteredMedicineList"
           :key="medicine.id"
           :medicine="medicine"
+          :tags="tagList"
           :index="index"
           @view="handleView"
           @edit="handleEdit"
@@ -153,14 +200,29 @@ const handleUpdate = (id: string, data: Partial<Medicine>) => {
     <MedicineForm
       v-model:visible="showFormDialog"
       :medicine="editingMedicine"
+      :tags="tagList"
       @save="handleSave"
       @update="handleUpdate"
+      @manage-tags="handleFormManageTags"
     />
 
     <MedicineDetail
       v-model:visible="showDetailDialog"
       :medicine="viewingMedicine"
+      :tags="tagList"
       @edit="handleEditFromDetail"
+    />
+
+    <ExportDialog
+      v-model:visible="showExportDialog"
+      :all-count="medicineList.length"
+      :filtered-count="filteredMedicineList.length"
+      @export="handleDoExport"
+    />
+
+    <TagManager
+      v-model:visible="showTagManager"
+      @update:visible="handleTagManagerClose"
     />
   </div>
 </template>

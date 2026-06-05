@@ -10,6 +10,13 @@ export type MedicineCategory =
 
 export type ExpiryStatus = 'normal' | 'warning' | 'expired'
 
+export interface MedicineTag {
+  id: string
+  name: string
+  color: string
+  createdAt: string
+}
+
 export interface Medicine {
   id: string
   name: string
@@ -24,6 +31,7 @@ export interface Medicine {
   usage: string
   notes: string
   image: string
+  tagIds: string[]
   createdAt: string
   updatedAt: string
 }
@@ -32,6 +40,18 @@ export interface FilterOptions {
   keyword: string
   category: MedicineCategory | ''
   expiryStatus: ExpiryStatus | ''
+  tagIds: string[]
+}
+
+export type ExportFormat = 'json' | 'csv'
+
+export type ExportScope = 'all' | 'filtered'
+
+export interface ExportOptions {
+  format: ExportFormat
+  scope: ExportScope
+  includeTags: boolean
+  includeUsageRecords: boolean
 }
 
 export interface Statistics {

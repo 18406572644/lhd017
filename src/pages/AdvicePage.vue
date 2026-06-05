@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { Search, RefreshLeft, Reading, DataAnalysis, FirstAidKit, Warning, ArrowLeft, Edit, Delete, View } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useMedicineAdvice } from '@/composables/useMedicineAdvice'
+import { useTag } from '@/composables/useTag'
 import DisclaimerBanner from '@/components/DisclaimerBanner.vue'
 import MedicineDetail from '@/components/MedicineDetail.vue'
 import UsageRecordForm from '@/components/UsageRecordForm.vue'
@@ -13,6 +14,7 @@ import { calculateExpiryStatus, formatDaysLeft } from '@/utils/date'
 import { EXPIRY_STATUS_INFO } from '@/types/medicine'
 
 const router = useRouter()
+const { tagList } = useTag()
 const {
   symptomInput,
   isAnalyzing,
@@ -575,6 +577,7 @@ const goBack = () => {
     <MedicineDetail
       v-model:visible="showDetailDialog"
       :medicine="viewingMedicine"
+      :tags="tagList"
     />
 
     <UsageRecordForm

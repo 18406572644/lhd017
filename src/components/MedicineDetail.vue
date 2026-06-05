@@ -4,13 +4,14 @@ import {
   ColdDrink, HotWater, Goblet, DataAnalysis, FirstAidKit, Cherry, Apple, Box,
   Location, Calendar, Goods, OfficeBuilding, Edit,
 } from '@element-plus/icons-vue'
-import type { Medicine } from '@/types/medicine'
+import type { Medicine, MedicineTag } from '@/types/medicine'
 import { CATEGORY_LIST, EXPIRY_STATUS_INFO } from '@/types/medicine'
 import { calculateExpiryStatus, formatDaysLeft } from '@/utils/date'
 
 interface Props {
   visible: boolean
   medicine: Medicine | null
+  tags: MedicineTag[]
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -50,6 +51,12 @@ const iconComponent = computed(() => {
   return iconMap[categoryInfo.value.icon] || Box
 })
 
+const medicineTags = computed(() => {
+  if (!props.medicine) return []
+  const tagIds = props.medicine.tagIds || []
+  return props.tags.filter((t) => tagIds.includes(t.id))
+})
+
 const handleClose = () => {
   emit('update:visible', false)
 }
@@ -86,12 +93,26 @@ const handleEdit = () => {
         </div>
         <div class="medicine-detail__title-wrap">
           <h2 class="medicine-detail__title">{{ medicine.name }}</h2>
-          <span
-            class="medicine-detail__category"
-            :style="{ backgroundColor: categoryInfo.color + '15', color: categoryInfo.color }"
-          >
-            {{ categoryInfo.label }}
-          </span>
+          <div class="medicine-detail__labels">
+            <span
+              class="medicine-detail__category"
+              :style="{ backgroundColor: categoryInfo.color + '15', color: categoryInfo.color }"
+            >
+              {{ categoryInfo.label }}
+            </span>
+            <span
+              v-for="tag in medicineTags"
+              :key="tag.id"
+              class="medicine-detail__tag"
+              :style="{
+                backgroundColor: tag.color + '15',
+                color: tag.color,
+                borderColor: tag.color + '40',
+              }"
+            >
+              {{ tag.name }}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -270,7 +291,14 @@ const handleEdit = () => {
     font-size: 22px;
     font-weight: 600;
     color: var(--color-text-primary);
-    margin: 0 0 8px 0;
+    margin: 0 0 12px 0;
+  }
+
+  &__labels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
   }
 
   &__category {
@@ -279,6 +307,15 @@ const handleEdit = () => {
     border-radius: 12px;
     font-size: 13px;
     font-weight: 500;
+  }
+
+  &__tag {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid;
   }
 
   &__expiry {

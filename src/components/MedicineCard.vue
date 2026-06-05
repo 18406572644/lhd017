@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Edit, Delete, View, ColdDrink, HotWater, Goblet, DataAnalysis, FirstAidKit, Cherry, Apple, Box, Location, Calendar, Goods } from '@element-plus/icons-vue'
-import type { Medicine, ExpiryStatus } from '@/types/medicine'
+import type { Medicine, ExpiryStatus, MedicineTag } from '@/types/medicine'
 import { CATEGORY_LIST, EXPIRY_STATUS_INFO } from '@/types/medicine'
 import { calculateExpiryStatus, formatDaysLeft } from '@/utils/date'
 
 interface Props {
   medicine: Medicine
+  tags: MedicineTag[]
   index?: number
 }
 
@@ -44,6 +45,11 @@ const iconComponent = computed(() => {
     Box,
   }
   return iconMap[categoryInfo.value.icon] || Box
+})
+
+const medicineTags = computed(() => {
+  const tagIds = props.medicine.tagIds || []
+  return props.tags.filter((t) => tagIds.includes(t.id))
 })
 
 const cardAnimationDelay = computed(() => {
@@ -146,6 +152,21 @@ const handleDelete = () => {
 
       <div class="medicine-card__quantity">
         数量：<span class="medicine-card__quantity-num">{{ medicine.quantity }}</span> 盒/瓶
+      </div>
+
+      <div v-if="medicineTags.length > 0" class="medicine-card__tags">
+        <span
+          v-for="tag in medicineTags"
+          :key="tag.id"
+          class="medicine-card__tag"
+          :style="{
+            backgroundColor: tag.color + '15',
+            color: tag.color,
+            borderColor: tag.color + '40',
+          }"
+        >
+          {{ tag.name }}
+        </span>
       </div>
 
       <div class="medicine-card__symptoms" :title="medicine.symptoms">
@@ -350,6 +371,22 @@ const handleDelete = () => {
   &__quantity-num {
     color: var(--color-primary);
     font-weight: 600;
+  }
+
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  &__tag {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+    border: 1px solid;
+    white-space: nowrap;
   }
 
   &__symptoms {

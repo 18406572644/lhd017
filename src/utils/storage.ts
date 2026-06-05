@@ -1,7 +1,8 @@
-import type { Medicine, UsageRecord } from '@/types/medicine'
+import type { Medicine, UsageRecord, MedicineTag } from '@/types/medicine'
 
 const STORAGE_KEY = 'family-medicine-list'
 const USAGE_RECORD_KEY = 'family-medicine-usage-records'
+const TAG_KEY = 'family-medicine-tags'
 
 export function getMedicineList(): Medicine[] {
   try {
@@ -17,6 +18,23 @@ export function saveMedicineList(list: Medicine[]): void {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(list))
   } catch (error) {
     console.error('保存药品数据失败:', error)
+  }
+}
+
+export function getTagList(): MedicineTag[] {
+  try {
+    const data = localStorage.getItem(TAG_KEY)
+    return data ? JSON.parse(data) : []
+  } catch {
+    return []
+  }
+}
+
+export function saveTagList(tags: MedicineTag[]): void {
+  try {
+    localStorage.setItem(TAG_KEY, JSON.stringify(tags))
+  } catch (error) {
+    console.error('保存标签数据失败:', error)
   }
 }
 

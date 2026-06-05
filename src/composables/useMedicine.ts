@@ -10,6 +10,7 @@ export function useMedicine() {
     keyword: '',
     category: '',
     expiryStatus: '',
+    tagIds: [],
   })
 
   const loadMedicineList = () => {
@@ -23,7 +24,7 @@ export function useMedicine() {
 
   const filteredMedicineList = computed(() => {
     return medicineList.value.filter((medicine) => {
-      const { keyword, category, expiryStatus } = filterOptions.value
+      const { keyword, category, expiryStatus, tagIds } = filterOptions.value
       if (keyword) {
         const keywordLower = keyword.toLowerCase()
         const matchName = medicine.name.toLowerCase().includes(keywordLower)
@@ -39,6 +40,13 @@ export function useMedicine() {
       if (expiryStatus) {
         const { status } = calculateExpiryStatus(medicine.expiryDate)
         if (status !== expiryStatus) {
+          return false
+        }
+      }
+      if (tagIds && tagIds.length > 0) {
+        const medicineTagIds = medicine.tagIds || []
+        const hasTag = tagIds.some((tagId) => medicineTagIds.includes(tagId))
+        if (!hasTag) {
           return false
         }
       }
@@ -79,6 +87,7 @@ export function useMedicine() {
     const now = getTodayString()
     const newMedicine: Medicine = {
       ...medicineData,
+      tagIds: medicineData.tagIds || [],
       id: generateId(),
       createdAt: now,
       updatedAt: now,
@@ -128,6 +137,7 @@ export function useMedicine() {
       keyword: '',
       category: '',
       expiryStatus: '',
+      tagIds: [],
     }
   }
 
