@@ -28,7 +28,7 @@ declare module 'vue' {
     ElTag: typeof import('element-plus/es')['ElTag']
     Empty: typeof import('./src/components/Empty.vue')['default']
     FilterBar: typeof import('./src/components/FilterBar.vue')['default']
-    ImageUploader: typeof import('./src/components/ImageUploader.vue')['default']
+    ImageUpload: typeof import('./src/components/ImageUpload.vue')['default']
     MedicineCard: typeof import('./src/components/MedicineCard.vue')['default']
     MedicineDetail: typeof import('./src/components/MedicineDetail.vue')['default']
     MedicineForm: typeof import('./src/components/MedicineForm.vue')['default']

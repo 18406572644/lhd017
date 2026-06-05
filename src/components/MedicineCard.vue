@@ -76,8 +76,13 @@ const handleDelete = () => {
     />
     
     <div class="medicine-card__content">
+      <div v-if="medicine.image" class="medicine-card__image-wrap">
+        <img :src="medicine.image" :alt="medicine.name" class="medicine-card__image" />
+      </div>
+
       <div class="medicine-card__header">
         <div
+          v-if="!medicine.image"
           class="medicine-card__icon"
           :style="{ backgroundColor: categoryInfo.color + '20', color: categoryInfo.color }"
         >
@@ -212,6 +217,24 @@ const handleDelete = () => {
     flex-direction: column;
     flex: 1;
     gap: 12px;
+  }
+
+  &__image-wrap {
+    margin: -20px -20px 0;
+    height: 160px;
+    overflow: hidden;
+    background: var(--color-bg);
+  }
+
+  &__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-base);
+  }
+
+  &:hover &__image {
+    transform: scale(1.05);
   }
 
   &__header {

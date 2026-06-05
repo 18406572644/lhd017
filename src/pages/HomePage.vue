@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessageBox, ElMessage } from 'element-plus'
-import { FirstAidKit, Lightbulb } from '@element-plus/icons-vue'
+import { FirstAidKit, Reading } from '@element-plus/icons-vue'
 import type { Medicine } from '@/types/medicine'
 import { useMedicine } from '@/composables/useMedicine'
 import StatsCard from '@/components/StatsCard.vue'
@@ -96,7 +96,7 @@ const handleUpdate = (id: string, data: Partial<Medicine>) => {
           </div>
         </div>
         <button class="home-page__advice-btn" @click="goToAdvice">
-          <el-icon :size="18"><Lightbulb /></el-icon>
+          <el-icon :size="18"><Reading /></el-icon>
           <span>智能用药建议</span>
         </button>
       </div>

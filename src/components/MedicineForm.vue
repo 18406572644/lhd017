@@ -5,6 +5,7 @@ import type { FormInstance, FormRules } from 'element-plus'
 import type { Medicine, MedicineCategory } from '@/types/medicine'
 import { CATEGORY_LIST } from '@/types/medicine'
 import { getTodayString } from '@/utils/date'
+import ImageUpload from './ImageUpload.vue'
 
 interface Props {
   visible: boolean
@@ -39,6 +40,7 @@ const formData = ref({
   symptoms: '',
   usage: '',
   notes: '',
+  image: '',
 })
 
 const rules: FormRules = {
@@ -74,6 +76,7 @@ watch(
         symptoms: props.medicine.symptoms,
         usage: props.medicine.usage,
         notes: props.medicine.notes,
+        image: props.medicine.image || '',
       }
     } else if (newVal) {
       resetForm()
@@ -98,6 +101,7 @@ const resetForm = () => {
     symptoms: '',
     usage: '',
     notes: '',
+    image: '',
   }
   formRef.value?.resetFields()
 }
@@ -241,6 +245,12 @@ const handleSubmit = async () => {
               :rows="4"
               placeholder="请输入注意事项，如：孕妇慎用、服药期间禁止饮酒等"
             />
+          </el-form-item>
+        </el-tab-pane>
+
+        <el-tab-pane label="药品图片" name="image">
+          <el-form-item label="药品图片">
+            <ImageUpload v-model="formData.image" :max-size-m-b="2" />
           </el-form-item>
         </el-tab-pane>
       </el-tabs>

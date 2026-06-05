@@ -13,6 +13,9 @@ const subtractDays = (days: number) => {
   return date.toISOString().split('T')[0]
 }
 
+const imageUrl = (prompt: string) =>
+  `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${encodeURIComponent(prompt)}&image_size=landscape_4_3`
+
 export const mockMedicineList: Medicine[] = [
   {
     id: '1-001',
@@ -27,6 +30,7 @@ export const mockMedicineList: Medicine[] = [
     symptoms: '感冒引起的发热、头痛、四肢酸痛、打喷嚏、流鼻涕、鼻塞',
     usage: '口服。成人，一次1片，一日2次。',
     notes: '严重肝肾功能不全者禁用。服用本品期间不得饮酒或含有酒精的饮料。',
+    image: imageUrl('感冒药盒包装，黄色和白色为主，专业医药摄影，清晰展示药品名称和规格'),
     createdAt: subtractDays(30),
     updatedAt: subtractDays(30),
   },
@@ -43,6 +47,7 @@ export const mockMedicineList: Medicine[] = [
     symptoms: '用于缓解轻至中度疼痛如头痛、关节痛、偏头痛、牙痛、肌肉痛、神经痛、痛经。也用于普通感冒或流行性感冒引起的发热。',
     usage: '口服。成人，一次1粒，一日2次（早晚各一次）。',
     notes: '本品为对症治疗药，不宜长期或大量使用，用于止痛不得超过5天，用于解热不得超过3天。',
+    image: imageUrl('布洛芬胶囊药盒，蓝色和白色包装，展示透明胶囊颗粒，专业医药产品摄影'),
     createdAt: subtractDays(60),
     updatedAt: subtractDays(60),
   },
@@ -59,6 +64,7 @@ export const mockMedicineList: Medicine[] = [
     symptoms: '用于成人及儿童急、慢性腹泻。',
     usage: '口服，成人每次1袋（3克），一日3次。服用时将本品倒入半杯温开水（约50毫升）中混匀快速服完。',
     notes: '治疗急性腹泻时首次剂量应加倍。如需服用其他药物，建议与本品间隔一段时间。',
+    image: imageUrl('蒙脱石散药盒包装，绿色和白色为主，展示独立小袋装，柔和医疗风格'),
     createdAt: subtractDays(45),
     updatedAt: subtractDays(45),
   },
@@ -75,6 +81,7 @@ export const mockMedicineList: Medicine[] = [
     symptoms: '用于敏感菌（不产β内酰胺酶菌株）所致的中耳炎、鼻窦炎、咽炎、扁桃体炎等上呼吸道感染，泌尿生殖道感染，皮肤软组织感染，急性支气管炎、肺炎等下呼吸道感染。',
     usage: '口服。成人一次0.5g，每6～8小时1次，一日剂量不超过4g。',
     notes: '青霉素过敏及青霉素皮肤试验阳性患者禁用。用前必须做青霉素钠皮肤试验。',
+    image: imageUrl('阿莫西林抗生素药盒，红色和白色包装，展示胶囊，专业严肃的医药摄影'),
     createdAt: subtractDays(100),
     updatedAt: subtractDays(100),
   },
@@ -91,6 +98,7 @@ export const mockMedicineList: Medicine[] = [
     symptoms: '用于化脓性皮炎、皮肤真菌感染、小面积轻度烧烫伤，也用于小面积皮肤、黏膜创口的消毒。',
     usage: '外用。用棉签蘸取少量，由中心向外周局部涂搽。一日1～2次。',
     notes: '本品为外用药，切忌口服；如误服中毒，应立即用淀粉糊或米汤洗胃，并送医院救治。',
+    image: imageUrl('碘伏消毒液棕色玻璃瓶，配白色瓶盖，旁边放棉签，医疗用品风格'),
     createdAt: subtractDays(20),
     updatedAt: subtractDays(20),
   },
@@ -107,6 +115,7 @@ export const mockMedicineList: Medicine[] = [
     symptoms: '用于小创伤、擦伤等患处。',
     usage: '外用。撕去覆盖薄膜，将中间复合垫贴在创伤处，两端胶带固定。',
     notes: '本品为密封的无菌产品，若发现包装破损或已打开请勿使用。请选用规格相符的产品。',
+    image: imageUrl('创可贴产品展示，米色透气胶带，带吸水垫，展示包装和单片，家庭医疗用品'),
     createdAt: subtractDays(15),
     updatedAt: subtractDays(15),
   },
@@ -123,6 +132,7 @@ export const mockMedicineList: Medicine[] = [
     symptoms: '用于高血压、心绞痛。',
     usage: '口服。起始剂量一次10～20mg，一日2次。剂量可视患者反应酌情增加。',
     notes: '服药期间必须定期测量血压，在医生指导下调整剂量。不可骤然停药。',
+    image: imageUrl('降压药药盒包装，浅蓝色和白色，展示药片，专业医药摄影，体现长期服用的慢性病用药'),
     createdAt: subtractDays(30),
     updatedAt: subtractDays(5),
   },
@@ -139,6 +149,7 @@ export const mockMedicineList: Medicine[] = [
     symptoms: '用于预防坏血病，也可用于各种急慢性传染疾病及紫癜等的辅助治疗。',
     usage: '口服。用于补充维生素C：成人一日1片。用于治疗维生素C缺乏：成人一次1～2片，一日3次。',
     notes: '本品可通过胎盘并分泌入乳汁。孕妇服用过量时，可诱发新生儿产生坏血病。',
+    image: imageUrl('维生素C片橙色药瓶，白色药片，新鲜橙子背景，健康保健品风格，明亮清新'),
     createdAt: subtractDays(25),
     updatedAt: subtractDays(25),
   },
@@ -155,6 +166,7 @@ export const mockMedicineList: Medicine[] = [
     symptoms: '用于脾胃虚弱所致的食积，症见不思饮食、嗳腐酸臭、脘腹胀满；消化不良见上述证候者。',
     usage: '口服，可以咀嚼。一次3片，一日3次。小儿酌减。',
     notes: '饮食宜清淡，忌酒及辛辣、生冷、油腻食物。服药3天症状无缓解，应去医院就诊。',
+    image: imageUrl('健胃消食片药盒，浅棕色包装，展示咀嚼片，山楂山药等食材背景，温和中药风格'),
     createdAt: subtractDays(50),
     updatedAt: subtractDays(50),
   },
@@ -171,6 +183,7 @@ export const mockMedicineList: Medicine[] = [
     symptoms: '用于缓解过敏性鼻炎有关的症状，如喷嚏、流涕、鼻痒、鼻塞以及眼部痒及烧灼感。口服药物后，鼻和眼部症状及体征得以迅速缓解。亦适用于缓解慢性荨麻疹、瘙痒性皮肤病及其他过敏性皮肤病的症状及体征。',
     usage: '口服。成人及12岁以上儿童：一日1次，一次1片（10mg）。2～12岁儿童：体重>30公斤：一日1次，一次1片（10mg）。体重≤30公斤：一日1次，一次半片（5mg）。',
     notes: '对本品及其成分过敏者或特异体质的病人禁用。肝功能不全的患者请在医生指导下使用。',
+    image: imageUrl('抗过敏药氯雷他定片，紫色和白色药盒，展示药片，花粉背景体现抗过敏功能'),
     createdAt: subtractDays(80),
     updatedAt: subtractDays(80),
   },

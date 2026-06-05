@@ -23,6 +23,7 @@ export interface Medicine {
   symptoms: string
   usage: string
   notes: string
+  image: string
   createdAt: string
   updatedAt: string
 }

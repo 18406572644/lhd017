@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Search, RefreshLeft, Lightbulb, Stethoscope, Pill, Warning, ArrowLeft, Edit, Delete, View } from '@element-plus/icons-vue'
+import { Search, RefreshLeft, Reading, DataAnalysis, FirstAidKit, Warning, ArrowLeft, Edit, Delete, View } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useMedicineAdvice } from '@/composables/useMedicineAdvice'
 import DisclaimerBanner from '@/components/DisclaimerBanner.vue'
 import MedicineDetail from '@/components/MedicineDetail.vue'
 import UsageRecordForm from '@/components/UsageRecordForm.vue'
 import type { Medicine, MedicineRecommendation } from '@/types/medicine'
-import { CATEGORY_LIST, EFFECT_OPTIONS } from '@/types/medicine'
+import { CATEGORY_LIST, EFFECT_OPTIONS, SEVERITY_INFO } from '@/types/medicine'
 import { calculateExpiryStatus, formatDaysLeft } from '@/utils/date'
 import { EXPIRY_STATUS_INFO } from '@/types/medicine'
 
@@ -133,7 +133,7 @@ const goBack = () => {
         </button>
         <div class="advice-page__title-wrap">
           <h1 class="advice-page__title">
-            <el-icon :size="28"><Stethoscope /></el-icon>
+            <el-icon :size="28"><DataAnalysis /></el-icon>
             智能用药建议
           </h1>
           <p class="advice-page__subtitle">基于症状智能推荐，记录用药效果，积累个人经验</p>
@@ -148,7 +148,7 @@ const goBack = () => {
           :class="{ 'is-active': activeTab === 'advice' }"
           @click="activeTab = 'advice'"
         >
-          <el-icon><Lightbulb /></el-icon>
+          <el-icon><Reading /></el-icon>
           用药建议
         </div>
         <div
@@ -233,7 +233,7 @@ const goBack = () => {
 
           <div class="advice-page__matched-symptoms">
             <h3 class="advice-page__section-title">
-              <el-icon><Lightbulb /></el-icon>
+              <el-icon><Reading /></el-icon>
               已识别的症状
             </h3>
             <div class="advice-page__symptom-cards">
@@ -273,7 +273,7 @@ const goBack = () => {
           <div class="advice-page__recommendations">
             <div class="advice-page__section-header">
               <h3 class="advice-page__section-title">
-                <el-icon><Pill /></el-icon>
+                <el-icon><FirstAidKit /></el-icon>
                 推荐可用药品
                 <span class="advice-page__result-count">
                   共 {{ recommendations.length }} 种
@@ -421,7 +421,7 @@ const goBack = () => {
 
         <div v-else class="advice-page__welcome">
           <div class="advice-page__welcome-icon">
-            <el-icon :size="64"><Lightbulb /></el-icon>
+            <el-icon :size="64"><Reading /></el-icon>
           </div>
           <h3 class="advice-page__welcome-title">输入您的症状，获取智能用药建议</h3>
           <p class="advice-page__welcome-text">
@@ -472,7 +472,7 @@ const goBack = () => {
 
         <div v-if="getMostUsedMedicines.length > 0" class="advice-page__insights">
           <h3 class="advice-page__section-title">
-            <el-icon><Lightbulb /></el-icon>
+            <el-icon><Reading /></el-icon>
             用药洞察
           </h3>
           <div class="advice-page__insights-grid">

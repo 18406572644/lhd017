@@ -70,8 +70,13 @@ const handleEdit = () => {
     class="medicine-detail-dialog"
   >
     <div v-if="medicine" class="medicine-detail">
+      <div v-if="medicine.image" class="medicine-detail__image-wrap">
+        <img :src="medicine.image" :alt="medicine.name" class="medicine-detail__image" />
+      </div>
+
       <div class="medicine-detail__header">
         <div
+          v-if="!medicine.image"
           class="medicine-detail__icon"
           :style="{ backgroundColor: categoryInfo.color + '20', color: categoryInfo.color }"
         >
@@ -224,6 +229,20 @@ const handleEdit = () => {
 }
 
 .medicine-detail {
+  &__image-wrap {
+    margin: -20px -24px 20px;
+    height: 240px;
+    overflow: hidden;
+    background: var(--color-bg);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+
+  &__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
   &__header {
     display: flex;
     align-items: center;
