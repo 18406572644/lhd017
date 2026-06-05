@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessageBox, ElMessage } from 'element-plus'
-import { FirstAidKit } from '@element-plus/icons-vue'
+import { FirstAidKit, Lightbulb } from '@element-plus/icons-vue'
 import type { Medicine } from '@/types/medicine'
 import { useMedicine } from '@/composables/useMedicine'
 import StatsCard from '@/components/StatsCard.vue'
@@ -25,6 +26,12 @@ const showFormDialog = ref(false)
 const showDetailDialog = ref(false)
 const editingMedicine = ref<Medicine | null>(null)
 const viewingMedicine = ref<Medicine | null>(null)
+
+const router = useRouter()
+
+const goToAdvice = () => {
+  router.push('/advice')
+}
 
 const handleAdd = () => {
   editingMedicine.value = null
@@ -88,6 +95,10 @@ const handleUpdate = (id: string, data: Partial<Medicine>) => {
             <p class="home-page__subtitle">守护家人用药安全，智能提醒效期预警</p>
           </div>
         </div>
+        <button class="home-page__advice-btn" @click="goToAdvice">
+          <el-icon :size="18"><Lightbulb /></el-icon>
+          <span>智能用药建议</span>
+        </button>
       </div>
     </header>
 
@@ -221,6 +232,28 @@ const handleUpdate = (id: string, data: Partial<Medicine>) => {
     gap: 4px;
   }
 
+  &__advice-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-base);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+  }
+
   &__title {
     font-size: 28px;
     font-weight: 700;
@@ -295,6 +328,17 @@ const handleUpdate = (id: string, data: Partial<Medicine>) => {
   .home-page {
     &__header {
       padding: 24px 20px;
+    }
+
+    &__header-content {
+      flex-direction: column;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    &__advice-btn {
+      width: 100%;
+      justify-content: center;
     }
 
     &__title {

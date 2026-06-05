@@ -7,6 +7,7 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    DisclaimerBanner: typeof import('./src/components/DisclaimerBanner.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCol: typeof import('element-plus/es')['ElCol']
     ElDatePicker: typeof import('element-plus/es')['ElDatePicker']
@@ -18,17 +19,22 @@ declare module 'vue' {
     ElInput: typeof import('element-plus/es')['ElInput']
     ElInputNumber: typeof import('element-plus/es')['ElInputNumber']
     ElOption: typeof import('element-plus/es')['ElOption']
+    ElRadioButton: typeof import('element-plus/es')['ElRadioButton']
+    ElRadioGroup: typeof import('element-plus/es')['ElRadioGroup']
     ElRow: typeof import('element-plus/es')['ElRow']
     ElSelect: typeof import('element-plus/es')['ElSelect']
     ElTabPane: typeof import('element-plus/es')['ElTabPane']
     ElTabs: typeof import('element-plus/es')['ElTabs']
+    ElTag: typeof import('element-plus/es')['ElTag']
     Empty: typeof import('./src/components/Empty.vue')['default']
     FilterBar: typeof import('./src/components/FilterBar.vue')['default']
+    ImageUploader: typeof import('./src/components/ImageUploader.vue')['default']
     MedicineCard: typeof import('./src/components/MedicineCard.vue')['default']
     MedicineDetail: typeof import('./src/components/MedicineDetail.vue')['default']
     MedicineForm: typeof import('./src/components/MedicineForm.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     StatsCard: typeof import('./src/components/StatsCard.vue')['default']
+    UsageRecordForm: typeof import('./src/components/UsageRecordForm.vue')['default']
   }
 }

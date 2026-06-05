@@ -63,3 +63,52 @@ export const EXPIRY_STATUS_INFO = {
   warning: { label: '即将过期', color: '#FFB74D', bgColor: '#FFF3E0' },
   expired: { label: '已过期', color: '#EF5350', bgColor: '#FFEBEE' },
 }
+
+export interface SymptomMatch {
+  symptom: string
+  matchedKeywords: string[]
+  matchScore: number
+}
+
+export interface MedicineRecommendation {
+  medicine: Medicine
+  matchScore: number
+  matchedSymptoms: SymptomMatch[]
+  warnings: string[]
+  isExpired: boolean
+}
+
+export interface UsageRecord {
+  id: string
+  medicineId: string
+  medicineName: string
+  symptoms: string
+  usageDate: string
+  dosage: string
+  effect: 'excellent' | 'good' | 'average' | 'poor'
+  sideEffects: string
+  notes: string
+  createdAt: string
+}
+
+export interface SymptomKnowledge {
+  symptom: string
+  keywords: string[]
+  relatedSymptoms: string[]
+  severity: 'mild' | 'moderate' | 'severe'
+  warning: string
+  suggestions: string[]
+}
+
+export const EFFECT_OPTIONS = [
+  { value: 'excellent', label: '效果很好', color: '#8BC34A' },
+  { value: 'good', label: '效果不错', color: '#4A90D9' },
+  { value: 'average', label: '效果一般', color: '#FFB74D' },
+  { value: 'poor', label: '效果较差', color: '#EF5350' },
+]
+
+export const SEVERITY_INFO = {
+  mild: { label: '轻度', color: '#8BC34A', bgColor: '#E8F5E9' },
+  moderate: { label: '中度', color: '#FFB74D', bgColor: '#FFF3E0' },
+  severe: { label: '重度', color: '#EF5350', bgColor: '#FFEBEE' },
+}
