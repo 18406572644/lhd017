@@ -1,8 +1,10 @@
 import type { Medicine, UsageRecord, MedicineTag } from '@/types/medicine'
+import type { Prescription } from '@/types/prescription'
 
 const STORAGE_KEY = 'family-medicine-list'
 const USAGE_RECORD_KEY = 'family-medicine-usage-records'
 const TAG_KEY = 'family-medicine-tags'
+const PRESCRIPTION_KEY = 'family-prescription-list'
 
 export function getMedicineList(): Medicine[] {
   try {
@@ -83,4 +85,51 @@ export function updateUsageRecord(id: string, data: Partial<UsageRecord>): void 
 export function getUsageRecordsByMedicineId(medicineId: string): UsageRecord[] {
   const records = getUsageRecords()
   return records.filter((r) => r.medicineId === medicineId)
+}
+
+export function getPrescriptionList(): Prescription[] {
+  try {
+    const data = localStorage.getItem(PRESCRIPTION_KEY)
+    return data ? JSON.parse(data) : []
+  } catch {
+    return []
+  }
+}
+
+export function savePrescriptionList(list: Prescription[]): void {
+  try {
+    localStorage.setItem(PRESCRIPTION_KEY, JSON.stringify(list))
+  } catch (error) {
+    console.error('保存处方数据失败:', error)
+  }
+}
+
+export function addPrescription(prescription: Prescription): void {
+  const list = getPrescriptionList()
+  list.unshift(prescription)
+  savePrescriptionList(list)
+}
+
+export function updatePrescription(id: string, data: Partial<Prescription>): void {
+  const list = getPrescriptionList()
+  const index = list.findIndex((p) => p.id === id)
+  if (index !== -1) {
+    list[index] = { ...list[index], ...data }
+    savePrescriptionList(list)
+  }
+}
+
+export function deletePrescription(id: string): void {
+  const list = getPrescriptionList()
+  const filtered = list.filter((p) => p.id !== id)
+  savePrescriptionList(filtered)
+}
+
+export function getPrescriptionById(id: string): Prescription | undefined {
+  const list = getPrescriptionList()
+  return list.find((p) => p.id === id)
+}
+
+export function clearPrescriptionList(): void {
+  localStorage.removeItem(PRESCRIPTION_KEY)
 }
