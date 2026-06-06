@@ -34,6 +34,8 @@ export const mockMedicineList: Medicine[] = [
     tagIds: ['tag-005', 'tag-002'],
     createdAt: subtractDays(30),
     updatedAt: subtractDays(30),
+    purchasePrice: 25.8,
+    purchaseDate: subtractDays(30),
   },
   {
     id: '1-002',
@@ -52,6 +54,8 @@ export const mockMedicineList: Medicine[] = [
     tagIds: ['tag-005', 'tag-004'],
     createdAt: subtractDays(60),
     updatedAt: subtractDays(60),
+    purchasePrice: 32.5,
+    purchaseDate: subtractDays(60),
   },
   {
     id: '1-003',
@@ -70,6 +74,8 @@ export const mockMedicineList: Medicine[] = [
     tagIds: ['tag-001', 'tag-002'],
     createdAt: subtractDays(45),
     updatedAt: subtractDays(45),
+    purchasePrice: 18.9,
+    purchaseDate: subtractDays(45),
   },
   {
     id: '1-004',
@@ -88,6 +94,8 @@ export const mockMedicineList: Medicine[] = [
     tagIds: ['tag-004'],
     createdAt: subtractDays(100),
     updatedAt: subtractDays(100),
+    purchasePrice: 45.0,
+    purchaseDate: subtractDays(100),
   },
   {
     id: '1-005',
@@ -106,6 +114,8 @@ export const mockMedicineList: Medicine[] = [
     tagIds: ['tag-004', 'tag-002'],
     createdAt: subtractDays(20),
     updatedAt: subtractDays(20),
+    purchasePrice: 12.5,
+    purchaseDate: subtractDays(20),
   },
   {
     id: '1-006',
@@ -124,6 +134,8 @@ export const mockMedicineList: Medicine[] = [
     tagIds: ['tag-004', 'tag-002'],
     createdAt: subtractDays(15),
     updatedAt: subtractDays(15),
+    purchasePrice: 15.9,
+    purchaseDate: subtractDays(15),
   },
   {
     id: '1-007',
@@ -142,6 +154,8 @@ export const mockMedicineList: Medicine[] = [
     tagIds: ['tag-003'],
     createdAt: subtractDays(30),
     updatedAt: subtractDays(5),
+    purchasePrice: 58.0,
+    purchaseDate: subtractDays(30),
   },
   {
     id: '1-008',
@@ -160,6 +174,8 @@ export const mockMedicineList: Medicine[] = [
     tagIds: ['tag-001', 'tag-005'],
     createdAt: subtractDays(25),
     updatedAt: subtractDays(25),
+    purchasePrice: 28.5,
+    purchaseDate: subtractDays(25),
   },
   {
     id: '1-009',
@@ -178,6 +194,8 @@ export const mockMedicineList: Medicine[] = [
     tagIds: ['tag-001', 'tag-005'],
     createdAt: subtractDays(50),
     updatedAt: subtractDays(50),
+    purchasePrice: 22.0,
+    purchaseDate: subtractDays(50),
   },
   {
     id: '1-010',
@@ -196,5 +214,7 @@ export const mockMedicineList: Medicine[] = [
     tagIds: ['tag-005', 'tag-002'],
     createdAt: subtractDays(80),
     updatedAt: subtractDays(80),
+    purchasePrice: 35.6,
+    purchaseDate: subtractDays(80),
   },
 ]

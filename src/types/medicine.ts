@@ -31,6 +31,7 @@ export interface UsageRecord {
   dosage?: string
   effect?: EffectLevel
   sideEffects?: string
+  familyMember?: string
 }
 
 export interface SymptomMatch {
@@ -81,6 +82,8 @@ export interface Medicine {
   tagIds: string[]
   createdAt: string
   updatedAt: string
+  purchasePrice?: number
+  purchaseDate?: string
 }
 
 export interface FilterOptions {
@@ -154,4 +157,49 @@ export const EXPIRY_STATUS_INFO: Record<
   normal: { label: '正常', type: 'success', bgColor: '#ecfdf5', color: '#059669' },
   warning: { label: '即将过期', type: 'warning', bgColor: '#fffbeb', color: '#d97706' },
   expired: { label: '已过期', type: 'danger', bgColor: '#fef2f2', color: '#dc2626' },
+}
+
+export const FAMILY_MEMBERS = [
+  { value: 'father', label: '父亲', color: '#3b82f6' },
+  { value: 'mother', label: '母亲', color: '#ec4899' },
+  { value: 'grandpa', label: '爷爷', color: '#f97316' },
+  { value: 'grandma', label: '奶奶', color: '#8b5cf6' },
+  { value: 'son', label: '儿子', color: '#10b981' },
+  { value: 'daughter', label: '女儿', color: '#f59e0b' },
+  { value: 'other', label: '其他', color: '#6b7280' },
+] as const
+
+export type FamilyMember = typeof FAMILY_MEMBERS[number]['value']
+
+export interface ChartExportOptions {
+  title: string
+  format: 'png' | 'jpeg'
+  quality: number
+}
+
+export interface UsageTrendData {
+  date: string
+  count: number
+}
+
+export interface CategoryData {
+  name: string
+  value: number
+  color: string
+}
+
+export interface ExpiryForecastData {
+  period: string
+  count: number
+}
+
+export interface MonthlyCostData {
+  month: string
+  cost: number
+}
+
+export interface FamilyUsageData {
+  member: string
+  count: number
+  color: string
 }

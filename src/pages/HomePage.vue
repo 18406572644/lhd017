@@ -3,7 +3,8 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   FirstAidKit, DataAnalysis, Document, Search,
-  Warning, CircleCheck, Clock, Plus,
+  Warning, CircleCheck, Clock, Plus, ChatDotRound,
+  TrendCharts,
 } from '@element-plus/icons-vue'
 import { useMedicine } from '@/composables/useMedicine'
 import { usePrescription } from '@/composables/usePrescription'
@@ -214,7 +215,7 @@ const navigateTo = (path: string) => {
           @click="navigateTo('/advice')"
         >
           <div class="home-page__nav-icon" style="background: linear-gradient(135deg, #4A90D9 0%, #7AB0E8 100%);">
-            <el-icon :size="28"><DataAnalysis /></el-icon>
+            <el-icon :size="28"><ChatDotRound /></el-icon>
           </div>
           <div class="home-page__nav-info">
             <h3 class="home-page__nav-title">智能用药建议</h3>
@@ -239,6 +240,24 @@ const navigateTo = (path: string) => {
               <span class="home-page__nav-stat home-page__nav-stat--warning">
                 <Warning />
                 {{ prescriptionStats.warning }} 即将过期
+              </span>
+            </div>
+          </div>
+        </div>
+        <div
+          class="home-page__nav-card"
+          @click="navigateTo('/stats')"
+        >
+          <div class="home-page__nav-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);">
+            <el-icon :size="28"><DataAnalysis /></el-icon>
+          </div>
+          <div class="home-page__nav-info">
+            <h3 class="home-page__nav-title">数据统计</h3>
+            <p class="home-page__nav-desc">多维度可视化分析</p>
+            <div class="home-page__nav-stats">
+              <span class="home-page__nav-stat">
+                <TrendCharts />
+                {{ statistics.total }} 种药品
               </span>
             </div>
           </div>

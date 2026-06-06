@@ -1,5 +1,6 @@
 import type { Medicine, UsageRecord, MedicineTag } from '@/types/medicine'
 import type { Prescription } from '@/types/prescription'
+import { mockUsageRecords } from '@/data/mockUsageRecords'
 
 const STORAGE_KEY = 'family-medicine-list'
 const USAGE_RECORD_KEY = 'family-medicine-usage-records'
@@ -47,9 +48,13 @@ export function clearMedicineList(): void {
 export function getUsageRecords(): UsageRecord[] {
   try {
     const data = localStorage.getItem(USAGE_RECORD_KEY)
-    return data ? JSON.parse(data) : []
+    if (data) {
+      return JSON.parse(data)
+    }
+    saveUsageRecords(mockUsageRecords)
+    return mockUsageRecords
   } catch {
-    return []
+    return mockUsageRecords
   }
 }
 

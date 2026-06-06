@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomePage from '@/pages/HomePage.vue'
 import AdvicePage from '@/pages/AdvicePage.vue'
 import PrescriptionPage from '@/pages/PrescriptionPage.vue'
+import StatsPage from '@/pages/StatsPage.vue'
 
 // 定义路由配置
 const routes = [
@@ -19,6 +20,11 @@ const routes = [
     path: '/prescription',
     name: 'prescription',
     component: PrescriptionPage,
+  },
+  {
+    path: '/stats',
+    name: 'stats',
+    component: StatsPage,
   },
   {
     path: '/about',

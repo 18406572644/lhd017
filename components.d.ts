@@ -7,10 +7,12 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    CategoryPieChart: typeof import('./src/components/charts/CategoryPieChart.vue')['default']
     DisclaimerBanner: typeof import('./src/components/DisclaimerBanner.vue')['default']
     ElAlert: typeof import('element-plus/es')['ElAlert']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCheckbox: typeof import('element-plus/es')['ElCheckbox']
+    ElCheckboxGroup: typeof import('element-plus/es')['ElCheckboxGroup']
     ElCol: typeof import('element-plus/es')['ElCol']
     ElColorPicker: typeof import('element-plus/es')['ElColorPicker']
     ElDatePicker: typeof import('element-plus/es')['ElDatePicker']
@@ -30,15 +32,19 @@ declare module 'vue' {
     ElRadioGroup: typeof import('element-plus/es')['ElRadioGroup']
     ElRow: typeof import('element-plus/es')['ElRow']
     ElSelect: typeof import('element-plus/es')['ElSelect']
+    ElSlider: typeof import('element-plus/es')['ElSlider']
     ElTabPane: typeof import('element-plus/es')['ElTabPane']
     ElTabs: typeof import('element-plus/es')['ElTabs']
     ElTag: typeof import('element-plus/es')['ElTag']
     Empty: typeof import('./src/components/Empty.vue')['default']
+    ExpiryForecastChart: typeof import('./src/components/charts/ExpiryForecastChart.vue')['default']
     ExportDialog: typeof import('./src/components/ExportDialog.vue')['default']
+    FamilyUsageRadarChart: typeof import('./src/components/charts/FamilyUsageRadarChart.vue')['default']
     ImageUpload: typeof import('./src/components/ImageUpload.vue')['default']
     MedicineCard: typeof import('./src/components/MedicineCard.vue')['default']
     MedicineDetail: typeof import('./src/components/MedicineDetail.vue')['default']
     MedicineForm: typeof import('./src/components/MedicineForm.vue')['default']
+    MonthlyCostChart: typeof import('./src/components/charts/MonthlyCostChart.vue')['default']
     PrescriptionCard: typeof import('./src/components/PrescriptionCard.vue')['default']
     PrescriptionDetail: typeof import('./src/components/PrescriptionDetail.vue')['default']
     PrescriptionForm: typeof import('./src/components/PrescriptionForm.vue')['default']
@@ -47,5 +53,6 @@ declare module 'vue' {
     StatsCard: typeof import('./src/components/StatsCard.vue')['default']
     TagManager: typeof import('./src/components/TagManager.vue')['default']
     UsageRecordForm: typeof import('./src/components/UsageRecordForm.vue')['default']
+    UsageTrendChart: typeof import('./src/components/charts/UsageTrendChart.vue')['default']
   }
 }

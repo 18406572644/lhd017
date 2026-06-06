@@ -82,6 +82,8 @@ export interface OCRResult {
       frequency: string
       quantity: number
       days: number
+      medicineId?: string
+      notes?: string
     }>
   }
   message?: string
