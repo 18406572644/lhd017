@@ -1,16 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Edit, Delete, View, User, OfficeBuilding, UserFilled, Calendar, Goods, Clock, Notification } from '@element-plus/icons-vue'
+import { Edit, Delete, View, User, OfficeBuilding, UserFilled, Calendar, Goods, Clock, Notification, Document } from '@element-plus/icons-vue'
 import type { Prescription } from '@/types/prescription'
 import { PRESCRIPTION_CATEGORY_LABELS, PRESCRIPTION_STATUS_LABELS } from '@/types/prescription'
 import { getPrescriptionExpiryStatus, formatPrescriptionDaysLeft } from '@/utils/ocr'
 
-interface Props {
+const props = withDefaults(defineProps<{
   prescription: Prescription
   index?: number
-}
-
-const props = withDefaults(defineProps<Props>(), {
+}>(), {
   index: 0,
 })
 
@@ -226,13 +224,6 @@ const handleDelete = () => {
     </div>
   </div>
 </template>
-
-<script lang="ts">
-import { Document } from '@element-plus/icons-vue'
-export default {
-  components: { Document },
-}
-</script>
 
 <style scoped lang="scss">
 .prescription-card {

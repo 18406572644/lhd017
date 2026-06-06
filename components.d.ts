@@ -9,6 +9,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     CategoryPieChart: typeof import('./src/components/charts/CategoryPieChart.vue')['default']
     DisclaimerBanner: typeof import('./src/components/DisclaimerBanner.vue')['default']
+    DrugInteractionAlert: typeof import('./src/components/DrugInteractionAlert.vue')['default']
     ElAlert: typeof import('element-plus/es')['ElAlert']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCheckbox: typeof import('element-plus/es')['ElCheckbox']
@@ -40,6 +41,7 @@ declare module 'vue' {
     ExpiryForecastChart: typeof import('./src/components/charts/ExpiryForecastChart.vue')['default']
     ExportDialog: typeof import('./src/components/ExportDialog.vue')['default']
     FamilyUsageRadarChart: typeof import('./src/components/charts/FamilyUsageRadarChart.vue')['default']
+    HealthProfileManager: typeof import('./src/components/HealthProfileManager.vue')['default']
     ImageUpload: typeof import('./src/components/ImageUpload.vue')['default']
     MedicineCard: typeof import('./src/components/MedicineCard.vue')['default']
     MedicineDetail: typeof import('./src/components/MedicineDetail.vue')['default']

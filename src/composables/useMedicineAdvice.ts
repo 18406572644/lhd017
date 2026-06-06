@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue'
-import type { Medicine, MedicineRecommendation, SymptomMatch, SymptomKnowledge, UsageRecord } from '@/types/medicine'
+import type { Medicine, MedicineRecommendation, SymptomMatch, SymptomKnowledge, UsageRecord, FamilyMember } from '@/types/medicine'
 import { SEVERITY_INFO } from '@/types/medicine'
 import { symptomKnowledgeBase, commonSymptomSuggestions, DISCLAIMER_TEXT } from '@/data/symptomKnowledge'
 import { getMedicineList } from '@/utils/storage'
@@ -127,6 +127,7 @@ export function useMedicineAdvice() {
     effect: 'excellent' | 'good' | 'average' | 'poor'
     sideEffects: string
     notes: string
+    familyMember: FamilyMember
   }) => {
     const record: UsageRecord = {
       id: generateId(),

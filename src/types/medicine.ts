@@ -203,3 +203,117 @@ export interface FamilyUsageData {
   count: number
   color: string
 }
+
+export type InteractionRiskLevel = 'safe' | 'caution' | 'danger'
+
+export const INTERACTION_RISK_INFO: Record<
+  InteractionRiskLevel,
+  { label: string; icon: string; bgColor: string; color: string; borderColor: string }
+> = {
+  safe: { label: '安全', icon: '🟢', bgColor: '#ecfdf5', color: '#059669', borderColor: '#10b981' },
+  caution: { label: '慎用', icon: '🟡', bgColor: '#fffbeb', color: '#d97706', borderColor: '#f59e0b' },
+  danger: { label: '禁用', icon: '🔴', bgColor: '#fef2f2', color: '#dc2626', borderColor: '#ef4444' },
+}
+
+export type InteractionType = 'drug-drug' | 'drug-herb' | 'drug-food'
+
+export const INTERACTION_TYPE_LABELS: Record<InteractionType, string> = {
+  'drug-drug': '西药-西药',
+  'drug-herb': '西药-中药',
+  'drug-food': '药品-食物',
+}
+
+export interface DrugInteraction {
+  id: string
+  drugAName: string
+  drugAAliases: string[]
+  drugBName: string
+  drugBAliases: string[]
+  type: InteractionType
+  riskLevel: InteractionRiskLevel
+  mechanism: string
+  symptoms: string[]
+  suggestions: string[]
+  references?: string
+}
+
+export type SpecialPeriodType =
+  | 'pregnancy'
+  | 'pre-pregnancy'
+  | 'lactation'
+  | 'liver-dysfunction'
+  | 'kidney-dysfunction'
+  | 'elderly'
+  | 'child'
+
+export const SPECIAL_PERIOD_INFO: Record<
+  SpecialPeriodType,
+  { label: string; icon: string; description: string; color: string }
+> = {
+  pregnancy: { label: '怀孕期间', icon: '🤰', description: '已怀孕，需特别注意用药安全', color: '#ec4899' },
+  'pre-pregnancy': { label: '备孕期', icon: '💑', description: '正在备孕中', color: '#f472b6' },
+  lactation: { label: '哺乳期', icon: '🍼', description: '正在哺乳', color: '#fb923c' },
+  'liver-dysfunction': { label: '肝功能不全', icon: '🫀', description: '肝功能异常', color: '#eab308' },
+  'kidney-dysfunction': { label: '肾功能不全', icon: '🫘', description: '肾功能异常', color: '#8b5cf6' },
+  elderly: { label: '老年人', icon: '👴', description: '65岁以上老年人', color: '#6b7280' },
+  child: { label: '儿童', icon: '👶', description: '12岁以下儿童', color: '#06b6d4' },
+}
+
+export interface Contraindication {
+  id: string
+  drugName: string
+  drugAliases: string[]
+  specialPeriod: SpecialPeriodType
+  riskLevel: InteractionRiskLevel
+  mechanism: string
+  symptoms: string[]
+  suggestions: string[]
+  alternativeDrugs?: string[]
+}
+
+export interface InteractionCheckResult {
+  drugName: string
+  interactingDrugName: string
+  type: InteractionType
+  riskLevel: InteractionRiskLevel
+  mechanism: string
+  symptoms: string[]
+  suggestions: string[]
+  interactionDate?: string
+}
+
+export interface ContraindicationCheckResult {
+  drugName: string
+  specialPeriod: SpecialPeriodType
+  riskLevel: InteractionRiskLevel
+  mechanism: string
+  symptoms: string[]
+  suggestions: string[]
+  alternativeDrugs?: string[]
+}
+
+export interface ComprehensiveCheckResult {
+  overallRisk: InteractionRiskLevel
+  interactionResults: InteractionCheckResult[]
+  contraindicationResults: ContraindicationCheckResult[]
+  safeDrugs: string[]
+  checkedDate: string
+}
+
+export interface UserHealthProfile {
+  id: string
+  familyMember: FamilyMember
+  specialPeriods: SpecialPeriodType[]
+  allergies: string[]
+  chronicDiseases: string[]
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CheckHistory {
+  id: string
+  checkedDrugs: string[]
+  result: ComprehensiveCheckResult
+  createdAt: string
+  familyMember?: string
+}

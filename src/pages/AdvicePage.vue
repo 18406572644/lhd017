@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Search, RefreshLeft, Reading, DataAnalysis, FirstAidKit, Warning, ArrowLeft, Edit, Delete, View } from '@element-plus/icons-vue'
+import { Search, RefreshLeft, Reading, DataAnalysis, FirstAidKit, Warning, ArrowLeft, Edit, Delete, View, User } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useMedicineAdvice } from '@/composables/useMedicineAdvice'
 import { useTag } from '@/composables/useTag'
 import DisclaimerBanner from '@/components/DisclaimerBanner.vue'
 import MedicineDetail from '@/components/MedicineDetail.vue'
 import UsageRecordForm from '@/components/UsageRecordForm.vue'
-import type { Medicine, MedicineRecommendation } from '@/types/medicine'
+import HealthProfileManager from '@/components/HealthProfileManager.vue'
+import type { Medicine, MedicineRecommendation, FamilyMember } from '@/types/medicine'
 import { CATEGORY_LIST, EFFECT_OPTIONS, SEVERITY_INFO } from '@/types/medicine'
 import { calculateExpiryStatus, formatDaysLeft } from '@/utils/date'
 import { EXPIRY_STATUS_INFO } from '@/types/medicine'
@@ -37,6 +38,7 @@ const {
 const inputValue = ref('')
 const showDetailDialog = ref(false)
 const showRecordDialog = ref(false)
+const showHealthProfile = ref(false)
 const viewingMedicine = ref<Medicine | null>(null)
 const recordingMedicine = ref<Medicine | null>(null)
 const activeTab = ref<'advice' | 'history'>('advice')
@@ -83,6 +85,7 @@ const handleSaveRecord = (data: {
   effect: 'excellent' | 'good' | 'average' | 'poor'
   sideEffects: string
   notes: string
+  familyMember: FamilyMember
 }) => {
   if (!recordingMedicine.value) return
   createUsageRecord({
@@ -93,6 +96,10 @@ const handleSaveRecord = (data: {
   ElMessage.success('用药记录已保存')
   showRecordDialog.value = false
   recordingMedicine.value = null
+}
+
+const handleOpenHealthProfile = () => {
+  showHealthProfile.value = true
 }
 
 const handleDeleteRecord = async (id: string) => {
@@ -139,6 +146,16 @@ const goBack = () => {
             智能用药建议
           </h1>
           <p class="advice-page__subtitle">基于症状智能推荐，记录用药效果，积累个人经验</p>
+        </div>
+        <div class="advice-page__header-actions">
+          <el-button
+            type="success"
+            :icon="User"
+            @click="handleOpenHealthProfile"
+            class="advice-page__health-btn"
+          >
+            健康档案
+          </el-button>
         </div>
       </div>
     </header>
@@ -586,6 +603,8 @@ const goBack = () => {
       :default-symptoms="symptomInput"
       @save="handleSaveRecord"
     />
+
+    <HealthProfileManager v-model:visible="showHealthProfile" />
   </div>
 </template>
 
@@ -647,6 +666,25 @@ const goBack = () => {
     font-size: 14px;
     opacity: 0.9;
     margin: 0;
+  }
+
+  &__header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  &__health-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    font-weight: 500;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+      color: #fff;
+    }
   }
 
   &__main {
