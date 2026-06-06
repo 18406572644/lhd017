@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   FirstAidKit, DataAnalysis, Document, Search,
   Warning, CircleCheck, Clock, Plus, ChatDotRound,
-  TrendCharts,
+  TrendCharts, Star, Refresh, Delete,
 } from '@element-plus/icons-vue'
 import { useMedicine } from '@/composables/useMedicine'
 import { usePrescription } from '@/composables/usePrescription'
@@ -17,25 +17,46 @@ import TagManager from '@/components/TagManager.vue'
 import ExportDialog from '@/components/ExportDialog.vue'
 import DisclaimerBanner from '@/components/DisclaimerBanner.vue'
 import Empty from '@/components/Empty.vue'
-import type { Medicine, ExportOptions } from '@/types/medicine'
-import { MEDICINE_CATEGORY_LABELS, EXPIRY_STATUS_INFO } from '@/types/medicine'
+import type { Medicine, ExportOptions, SearchSuggestion, SearchMatchResult, SortDimension } from '@/types/medicine'
+import { 
+  MEDICINE_CATEGORY_LABELS, 
+  EXPIRY_STATUS_INFO,
+  SORT_DIMENSION_OPTIONS,
+  SEARCH_SUGGESTION_TYPE_LABELS,
+  SEARCH_SUGGESTION_TYPE_COLORS,
+} from '@/types/medicine'
 import { calculateExpiryStatus } from '@/utils/date'
 import { exportMedicineData } from '@/utils/export'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { highlightMatch } from '@/utils/searchSuggestion'
 
 const router = useRouter()
 
 const {
   medicineList,
   filteredMedicineList,
+  searchMatchResults,
   filterOptions,
+  sortDimension,
+  searchSuggestions,
+  showSuggestions,
+  correctedKeyword,
   statistics,
+  hotSearchTerms,
+  recentSearches,
   loadMedicineList,
   addMedicine,
   updateMedicine,
   deleteMedicine,
+  performSearch,
+  updateSuggestions,
+  selectSuggestion,
+  setSortDimension,
+  recordMedicineView,
+  recordMedicineUse,
   setFilter,
   resetFilter,
+  clearHistory,
 } = useMedicine()
 
 const {
@@ -54,6 +75,8 @@ const showTagManager = ref(false)
 const showExportDialog = ref(false)
 const editingMedicine = ref<Medicine | null>(null)
 const viewingMedicine = ref<Medicine | null>(null)
+const searchInputRef = ref<any>(null)
+const suggestionDropdownRef = ref<any>(null)
 
 const expiryReminders = computed(() => {
   return checkExpiringReminders()
@@ -65,19 +88,107 @@ const recentMedicines = computed(() => {
     .slice(0, 6)
 })
 
+const searchResultCount = computed(() => {
+  return filteredMedicineList.value.length
+})
+
+const searchHasResults = computed(() => {
+  return filterOptions.value.keyword && filterOptions.value.keyword.trim()
+})
+
+watch(keyword, (newVal) => {
+  updateSuggestions(newVal)
+  if (newVal && newVal.trim()) {
+    showSuggestions.value = true
+  }
+})
+
+watch(filterOptions, (newOptions) => {
+  if (newOptions.keyword !== keyword.value) {
+    keyword.value = newOptions.keyword
+  }
+}, { deep: true })
+
 onMounted(() => {
   loadMedicineList()
   loadPrescriptionList()
   loadTagList()
+  
+  document.addEventListener('click', handleDocumentClick)
 })
 
+const handleDocumentClick = (event: MouseEvent) => {
+  const target = event.target as HTMLElement
+  if (
+    suggestionDropdownRef.value &&
+    !suggestionDropdownRef.value.contains(target) &&
+    searchInputRef.value &&
+    !searchInputRef.value.contains(target)
+  ) {
+    showSuggestions.value = false
+  }
+}
+
 const handleSearch = () => {
-  setFilter({ keyword: keyword.value })
+  performSearch(keyword.value)
 }
 
 const handleReset = () => {
   keyword.value = ''
   resetFilter()
+}
+
+const handleSuggestionClick = (suggestion: SearchSuggestion) => {
+  keyword.value = suggestion.text
+  selectSuggestion(suggestion)
+}
+
+const handleHotSearchClick = (term: string) => {
+  keyword.value = term
+  performSearch(term)
+}
+
+const handleRecentSearchClick = (term: string) => {
+  keyword.value = term
+  performSearch(term)
+}
+
+const handleSortChange = (dimension: SortDimension) => {
+  setSortDimension(dimension)
+}
+
+const handleSearchInputFocus = () => {
+  updateSuggestions(keyword.value)
+  showSuggestions.value = true
+}
+
+const handleUseCorrectedKeyword = () => {
+  if (correctedKeyword.value) {
+    keyword.value = correctedKeyword.value
+    performSearch(correctedKeyword.value)
+  }
+}
+
+const handleClearHistory = async () => {
+  try {
+    await ElMessageBox.confirm(
+      '确定要清空搜索历史记录吗？',
+      '清空确认',
+      {
+        confirmButtonText: '确定清空',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    )
+    clearHistory()
+    ElMessage.success('搜索历史已清空')
+  } catch {
+    // User cancelled
+  }
+}
+
+const getMatchResultForMedicine = (medicineId: string): SearchMatchResult | undefined => {
+  return searchMatchResults.value.find(r => r.medicine.id === medicineId)
 }
 
 const handleCategoryFilter = (category: string) => {
@@ -102,6 +213,12 @@ const handleEditMedicine = (medicine: Medicine) => {
 const handleViewMedicine = (medicine: Medicine) => {
   viewingMedicine.value = medicine
   showDetailDialog.value = true
+  recordMedicineView(medicine.id, medicine.name)
+}
+
+const handleRecordUse = (medicine: Medicine) => {
+  recordMedicineUse(medicine.id, medicine.name)
+  ElMessage.success(`已记录使用：${medicine.name}`)
 }
 
 const handleDeleteMedicine = async (medicine: Medicine) => {
@@ -289,19 +406,128 @@ const navigateTo = (path: string) => {
 
       <div class="home-page__filter-section">
         <div class="home-page__search-bar">
-          <div class="home-page__search-input-wrap">
+          <div class="home-page__search-input-wrap" ref="searchInputRef">
             <el-icon class="home-page__search-icon"><Search /></el-icon>
             <el-input
               v-model="keyword"
-              placeholder="搜索药品名称、症状、生产厂家..."
+              placeholder="搜索药品名称、症状、拼音首字母..."
               class="home-page__search-input"
               clearable
               @keyup.enter="handleSearch"
               @clear="handleReset"
+              @focus="handleSearchInputFocus"
+              @input="updateSuggestions(keyword)"
             />
             <el-button type="primary" class="home-page__search-btn" @click="handleSearch">
               搜索
             </el-button>
+
+            <div
+              v-if="showSuggestions"
+              class="home-page__suggestion-dropdown"
+              ref="suggestionDropdownRef"
+            >
+              <div v-if="correctedKeyword" class="home-page__correction-tip">
+                <el-icon><Refresh /></el-icon>
+                <span>已自动纠正为「<strong>{{ correctedKeyword }}</strong>」</span>
+                <el-button type="primary" link size="small" @click="handleUseCorrectedKeyword">
+                  使用纠正词
+                </el-button>
+              </div>
+
+              <div v-if="!keyword && hotSearchTerms.length > 0" class="home-page__suggestion-section">
+                <div class="home-page__suggestion-title">
+                  <el-icon><Star /></el-icon>
+                  <span>热门搜索</span>
+                </div>
+                <div class="home-page__hot-search-list">
+                  <span
+                    v-for="(term, index) in hotSearchTerms"
+                    :key="term"
+                    class="home-page__hot-search-tag"
+                    :class="`home-page__hot-search-tag--rank-${index + 1}`"
+                    @click="handleHotSearchClick(term)"
+                  >
+                    <span class="home-page__hot-search-rank">{{ index + 1 }}</span>
+                    {{ term }}
+                  </span>
+                </div>
+              </div>
+
+              <div v-if="!keyword && recentSearches.length > 0" class="home-page__suggestion-section">
+                <div class="home-page__suggestion-title">
+                  <el-icon><Clock /></el-icon>
+                  <span>最近搜索</span>
+                  <el-button type="danger" link size="small" @click="handleClearHistory">
+                    <el-icon><Delete /></el-icon>
+                    清空
+                  </el-button>
+                </div>
+                <div class="home-page__recent-search-list">
+                  <span
+                    v-for="term in recentSearches"
+                    :key="term"
+                    class="home-page__recent-search-tag"
+                    @click="handleRecentSearchClick(term)"
+                  >
+                    <el-icon><Clock /></el-icon>
+                    {{ term }}
+                  </span>
+                </div>
+              </div>
+
+              <div v-if="keyword && searchSuggestions.length > 0" class="home-page__suggestion-section">
+                <div class="home-page__suggestion-title">
+                  <el-icon><Search /></el-icon>
+                  <span>搜索建议</span>
+                </div>
+                <div class="home-page__suggestion-list">
+                  <div
+                    v-for="suggestion in searchSuggestions"
+                    :key="suggestion.text + suggestion.type"
+                    class="home-page__suggestion-item"
+                    @click="handleSuggestionClick(suggestion)"
+                  >
+                    <span
+                      class="home-page__suggestion-type"
+                      :style="{ backgroundColor: SEARCH_SUGGESTION_TYPE_COLORS[suggestion.type] + '20', color: SEARCH_SUGGESTION_TYPE_COLORS[suggestion.type] }"
+                    >
+                      {{ SEARCH_SUGGESTION_TYPE_LABELS[suggestion.type] }}
+                    </span>
+                    <span
+                      class="home-page__suggestion-text"
+                      v-html="suggestion.highlight || highlightMatch(suggestion.text, keyword)"
+                    ></span>
+                    <span class="home-page__suggestion-pinyin" v-if="suggestion.pinyinInitial">
+                      ({{ suggestion.pinyinInitial }})
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="keyword && searchSuggestions.length === 0" class="home-page__suggestion-empty">
+                <Empty description="暂无搜索建议" :show-action="false" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="searchHasResults" class="home-page__sort-bar">
+          <div class="home-page__sort-info">
+            找到 <strong>{{ searchResultCount }}</strong> 个相关结果
+          </div>
+          <div class="home-page__sort-options">
+            <span class="home-page__sort-label">排序：</span>
+            <div
+              v-for="option in SORT_DIMENSION_OPTIONS"
+              :key="option.value"
+              class="home-page__sort-option"
+              :class="{ 'is-active': sortDimension === option.value }"
+              @click="handleSortChange(option.value)"
+            >
+              <el-icon><component :is="option.icon" /></el-icon>
+              {{ option.label }}
+            </div>
           </div>
         </div>
 
@@ -342,13 +568,52 @@ const navigateTo = (path: string) => {
 
       <div class="home-page__section">
         <div class="home-page__section-header">
-          <h2 class="home-page__section-title">最近添加</h2>
+          <h2 class="home-page__section-title">
+            <span v-if="searchHasResults">搜索结果</span>
+            <span v-else>最近添加</span>
+          </h2>
           <el-button type="primary" text @click="handleReset">
             查看全部
           </el-button>
         </div>
 
-        <div v-if="recentMedicines.length > 0" class="home-page__medicine-grid">
+        <div v-if="searchHasResults && filteredMedicineList.length > 0" class="home-page__medicine-grid">
+          <div
+            v-for="(medicine, index) in filteredMedicineList"
+            :key="medicine.id"
+            class="home-page__medicine-card-wrap"
+          >
+            <MedicineCard
+              :medicine="medicine"
+              :tags="tagList"
+              :index="index"
+              @view="handleViewMedicine"
+              @edit="handleEditMedicine"
+              @delete="handleDeleteMedicine"
+            />
+            
+            <div v-if="getMatchResultForMedicine(medicine.id)?.matchReasons?.length" class="home-page__match-reasons">
+              <span
+                v-for="(reason, idx) in getMatchResultForMedicine(medicine.id)!.matchReasons.slice(0, 2)"
+                :key="idx"
+                class="home-page__match-reason"
+              >
+                {{ reason }}
+              </span>
+              <el-button
+                type="success"
+                size="small"
+                class="home-page__use-btn"
+                @click.stop="handleRecordUse(medicine)"
+              >
+                <el-icon><CircleCheck /></el-icon>
+                记录使用
+              </el-button>
+            </div>
+          </div>
+        </div>
+
+        <div v-else-if="!searchHasResults && recentMedicines.length > 0" class="home-page__medicine-grid">
           <MedicineCard
             v-for="(medicine, index) in recentMedicines"
             :key="medicine.id"
@@ -360,6 +625,14 @@ const navigateTo = (path: string) => {
             @delete="handleDeleteMedicine"
           />
         </div>
+
+        <Empty
+          v-else-if="searchHasResults && filteredMedicineList.length === 0"
+          description="未找到相关药品，试试其他关键词"
+          :show-action="true"
+          action-text="清空搜索"
+          @action="handleReset"
+        />
 
         <Empty
           v-else
@@ -642,6 +915,297 @@ const navigateTo = (path: string) => {
 
   &__search-btn {
     border-radius: var(--radius-md);
+  }
+
+  &__suggestion-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: var(--color-bg-card);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--color-border);
+    max-height: 480px;
+    overflow-y: auto;
+    z-index: 1000;
+  }
+
+  &__correction-tip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border-bottom: 1px solid var(--color-border);
+    font-size: 13px;
+    color: var(--color-text-secondary);
+
+    .el-icon {
+      color: #10b981;
+    }
+
+    strong {
+      color: #059669;
+      margin: 0 4px;
+    }
+  }
+
+  &__suggestion-section {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--color-border);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  &__suggestion-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 16px 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+
+    .el-icon {
+      color: var(--color-primary);
+    }
+
+    .el-button {
+      margin-left: auto;
+      padding: 0;
+      height: auto;
+      font-size: 12px;
+    }
+  }
+
+  &__hot-search-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 16px;
+  }
+
+  &__hot-search-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--color-bg);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-base);
+
+    &:hover {
+      background: var(--color-primary) + '15';
+      color: var(--color-primary);
+      transform: translateY(-1px);
+    }
+
+    &--rank-1, &--rank-2, &--rank-3 {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      color: #b45309;
+    }
+
+    &--rank-1 {
+      background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+      color: #b91c1c;
+    }
+
+    &--rank-2 {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      color: #b45309;
+    }
+
+    &--rank-3 {
+      background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+      color: #1d4ed8;
+    }
+  }
+
+  &__hot-search-rank {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.6);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  &__recent-search-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 16px;
+  }
+
+  &__recent-search-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--color-bg);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-base);
+
+    .el-icon {
+      font-size: 14px;
+    }
+
+    &:hover {
+      background: var(--color-primary) + '15';
+      color: var(--color-primary);
+    }
+  }
+
+  &__suggestion-list {
+    max-height: 240px;
+    overflow-y: auto;
+  }
+
+  &__suggestion-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: all var(--transition-base);
+
+    &:hover {
+      background: var(--color-primary) + '10';
+    }
+  }
+
+  &__suggestion-type {
+    flex-shrink: 0;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  &__suggestion-text {
+    flex: 1;
+    font-size: 14px;
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    em {
+      color: var(--color-primary);
+      font-style: normal;
+      font-weight: 600;
+    }
+  }
+
+  &__suggestion-pinyin {
+    flex-shrink: 0;
+    font-size: 12px;
+    color: var(--color-text-light);
+  }
+
+  &__suggestion-empty {
+    padding: 24px;
+    text-align: center;
+  }
+
+  &__sort-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  &__sort-info {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+
+    strong {
+      color: var(--color-primary);
+      font-size: 16px;
+      margin: 0 4px;
+    }
+  }
+
+  &__sort-options {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  &__sort-label {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    margin-right: 8px;
+  }
+
+  &__sort-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-base);
+
+    &:hover {
+      background: var(--color-primary) + '10';
+      color: var(--color-primary);
+    }
+
+    &.is-active {
+      background: var(--color-primary);
+      color: #fff;
+    }
+  }
+
+  &__medicine-card-wrap {
+    position: relative;
+  }
+
+  &__match-reasons {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 12px;
+    background: var(--color-bg);
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    margin-top: -4px;
+    border: 1px solid var(--color-border);
+    border-top: none;
+  }
+
+  &__match-reason {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    background: var(--color-primary) + '15';
+    color: var(--color-primary);
+    border-radius: 4px;
+    font-size: 11px;
+  }
+
+  &__use-btn {
+    margin-left: auto;
+    padding: 4px 12px;
+    height: 28px;
+    font-size: 12px;
   }
 
   &__quick-filters {

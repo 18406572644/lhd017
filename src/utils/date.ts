@@ -47,3 +47,12 @@ export function formatDaysLeft(daysLeft: number): string {
     return `还剩 ${daysLeft} 天`
   }
 }
+
+export function getDaysUntilExpiry(expiryDate: string): number {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const expiry = new Date(expiryDate)
+  expiry.setHours(0, 0, 0, 0)
+  const diffTime = expiry.getTime() - today.getTime()
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+}

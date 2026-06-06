@@ -317,3 +317,73 @@ export interface CheckHistory {
   createdAt: string
   familyMember?: string
 }
+
+export type SortDimension = 'relevance' | 'popularity' | 'expiry' | 'recent'
+
+export interface SearchSuggestion {
+  text: string
+  type: 'medicine' | 'symptom' | 'category' | 'history'
+  highlight?: string
+  pinyinInitial?: string
+}
+
+export interface SearchMatchResult {
+  medicine: Medicine
+  score: number
+  matchFields: string[]
+  matchReasons: string[]
+  correctedKeyword?: string
+  isExpired: boolean
+  daysUntilExpiry: number
+}
+
+export interface SearchBehaviorRecord {
+  id: string
+  keyword: string
+  timestamp: number
+  type: 'search' | 'view' | 'use'
+  medicineId?: string
+  medicineName?: string
+  duration?: number
+  fromKeyword?: string
+}
+
+export interface SearchContext {
+  recentSearches: string[]
+  searchHistory: SearchBehaviorRecord[]
+  viewHistory: SearchBehaviorRecord[]
+  useHistory: SearchBehaviorRecord[]
+  medicineUsageCount: Record<string, number>
+  medicineViewCount: Record<string, number>
+  keywordFrequency: Record<string, number>
+  lastSearchTime: Record<string, number>
+}
+
+export interface SearchFilterOptions extends FilterOptions {
+  sortDimension: SortDimension
+}
+
+export const SORT_DIMENSION_OPTIONS: Array<{
+  value: SortDimension
+  label: string
+  icon: string
+}> = [
+  { value: 'relevance', label: '智能排序', icon: 'TrendCharts' },
+  { value: 'popularity', label: '常用优先', icon: 'Star' },
+  { value: 'expiry', label: '效期优先', icon: 'Clock' },
+  { value: 'recent', label: '最近添加', icon: 'Clock' },
+]
+
+export const SEARCH_SUGGESTION_TYPE_LABELS: Record<SearchSuggestion['type'], string> = {
+  medicine: '药品',
+  symptom: '症状',
+  category: '分类',
+  history: '历史',
+}
+
+export const SEARCH_SUGGESTION_TYPE_COLORS: Record<SearchSuggestion['type'], string> = {
+  medicine: '#3b82f6',
+  symptom: '#f59e0b',
+  category: '#10b981',
+  history: '#6b7280',
+}
