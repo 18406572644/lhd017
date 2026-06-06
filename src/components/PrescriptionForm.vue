@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import { Camera, Plus, Delete, Link, Close, Loading } from '@element-plus/icons-vue'
+import { Camera, Plus, Delete, Link, Close, Loading, Check, Warning, Info } from '@element-plus/icons-vue'
 import type {
   Prescription,
   PrescriptionCategory,
@@ -11,7 +11,7 @@ import type {
 import { PRESCRIPTION_CATEGORY_LABELS } from '@/types/prescription'
 import type { Medicine } from '@/types/medicine'
 import { getTodayString } from '@/utils/date'
-import { recognizePrescription } from '@/utils/ocr'
+import { recognizePrescription, correctMedicineName } from '@/utils/ocr'
 import ImageUpload from './ImageUpload.vue'
 
 interface Props {
@@ -33,6 +33,17 @@ const emit = defineEmits<{
 const formRef = ref<FormInstance>()
 const activeTab = ref('basic')
 const isRecognizing = ref(false)
+const showRecognitionResult = ref(false)
+
+const recognitionInfo = reactive({
+  medicineCount: 0,
+  diagnosis: '',
+  handwritingQuality: '',
+  imageQuality: 0,
+  avgConfidence: 0,
+})
+
+const medicineConfidences = ref<Record<number, number>>({})
 
 const isEdit = computed(() => !!props.prescription)
 const dialogTitle = computed(() => (isEdit.value ? '编辑处方' : '新增处方'))
@@ -191,8 +202,11 @@ const handleOCRRecognize = async () => {
   }
 
   isRecognizing.value = true
+  medicineConfidences.value = {}
   try {
-    const result = await recognizePrescription(formData.value.image)
+    const result = await recognizePrescription(formData.value.image, {
+      medicineLibrary: props.medicineList,
+    })
     if (result.success && result.data) {
       const data = result.data
 
@@ -207,11 +221,40 @@ const handleOCRRecognize = async () => {
       if (data.issueDate) formData.value.issueDate = data.issueDate
       if (data.expiryDate) formData.value.expiryDate = data.expiryDate
       if (data.medicines && data.medicines.length > 0) {
-        formData.value.medicines = data.medicines.map((m) => ({
-          ...m,
-          medicineId: '',
-          notes: '',
-        }))
+        formData.value.medicines = data.medicines.map((m, idx) => {
+          const correctedName = correctMedicineName(m.name)
+          const existingMed = props.medicineList.find(
+            (lib) => lib.name === correctedName || lib.name === m.name
+          )
+          if (existingMed) {
+            medicineConfidences.value[idx] = 0.95
+            return {
+              ...m,
+              name: correctedName,
+              medicineId: existingMed.id,
+              specification: existingMed.specification,
+              notes: m.notes || '',
+            }
+          }
+          medicineConfidences.value[idx] = 0.82
+          return {
+            ...m,
+            name: correctedName,
+            medicineId: m.medicineId || '',
+            notes: m.notes || '',
+          }
+        })
+      }
+
+      if (result.analysis) {
+        recognitionInfo.medicineCount = result.analysis.medicineCount
+        recognitionInfo.diagnosis = result.analysis.diagnosis
+        recognitionInfo.handwritingQuality = result.analysis.handwritingQuality
+        recognitionInfo.imageQuality = result.analysis.imageQuality
+        const confs = Object.values(medicineConfidences.value)
+        recognitionInfo.avgConfidence =
+          confs.length > 0 ? confs.reduce((a, b) => a + b, 0) / confs.length : 0
+        showRecognitionResult.value = true
       }
 
       ElMessage.success(result.message || 'OCR识别成功')
@@ -224,6 +267,36 @@ const handleOCRRecognize = async () => {
   } finally {
     isRecognizing.value = false
   }
+}
+
+const getConfidenceColor = (confidence: number): string => {
+  if (confidence >= 0.9) return '#10b981'
+  if (confidence >= 0.75) return '#f59e0b'
+  return '#ef4444'
+}
+
+const getConfidenceLabel = (confidence: number): string => {
+  if (confidence >= 0.9) return '高'
+  if (confidence >= 0.75) return '中'
+  return '低'
+}
+
+const getHandwritingQualityLabel = (quality: string): string => {
+  const labels: Record<string, string> = {
+    good: '清晰',
+    medium: '一般',
+    poor: '潦草',
+  }
+  return labels[quality] || quality
+}
+
+const getHandwritingQualityColor = (quality: string): string => {
+  const colors: Record<string, string> = {
+    good: '#10b981',
+    medium: '#f59e0b',
+    poor: '#ef4444',
+  }
+  return colors[quality] || '#6b7280'
 }
 
 const addMedicine = () => {
@@ -328,6 +401,50 @@ const handleSubmit = async () => {
               上传图片后将自动进行OCR识别，也可以点击按钮重新识别
             </span>
           </el-form-item>
+
+          <el-alert
+            v-if="showRecognitionResult"
+            :title="`识别完成，共识别出 ${recognitionInfo.medicineCount} 种药品`"
+            type="success"
+            :closable="false"
+            show-icon
+            class="prescription-form__alert"
+          >
+            <div class="prescription-form__analysis">
+              <div class="prescription-form__analysis-item">
+                <el-icon><Info /></el-icon>
+                <span>诊断：{{ recognitionInfo.diagnosis }}</span>
+              </div>
+              <div class="prescription-form__analysis-item">
+                <el-icon><Check /></el-icon>
+                <span>
+                  识别准确率：
+                  <span :style="{ color: getConfidenceColor(recognitionInfo.avgConfidence), fontWeight: 600 }">
+                    {{ (recognitionInfo.avgConfidence * 100).toFixed(1) }}%
+                  </span>
+                </span>
+              </div>
+              <div class="prescription-form__analysis-item">
+                <el-icon><Warning /></el-icon>
+                <span>
+                  手写质量：
+                  <span :style="{ color: getHandwritingQualityColor(recognitionInfo.handwritingQuality), fontWeight: 600 }">
+                    {{ getHandwritingQualityLabel(recognitionInfo.handwritingQuality) }}
+                  </span>
+                </span>
+              </div>
+              <div class="prescription-form__analysis-item">
+                <el-icon><Camera /></el-icon>
+                <span>图片质量：{{ recognitionInfo.imageQuality }}%</span>
+              </div>
+            </div>
+            <template #title>
+              <div class="prescription-form__alert-title">
+                <el-icon><Check /></el-icon>
+                <span>识别完成，共识别出 {{ recognitionInfo.medicineCount }} 种药品</span>
+              </div>
+            </template>
+          </el-alert>
         </el-tab-pane>
 
         <el-tab-pane label="基本信息" name="basic">
@@ -479,7 +596,36 @@ const handleSubmit = async () => {
             class="prescription-form__medicine-item"
           >
             <div class="prescription-form__medicine-header">
-              <span class="prescription-form__medicine-number">药品 {{ index + 1 }}</span>
+              <div class="prescription-form__medicine-title">
+                <span class="prescription-form__medicine-number">药品 {{ index + 1 }}</span>
+                <span
+                  v-if="medicineConfidences[index] !== undefined"
+                  class="prescription-form__confidence-tag"
+                  :style="{
+                    backgroundColor: getConfidenceColor(medicineConfidences[index]) + '15',
+                    color: getConfidenceColor(medicineConfidences[index]),
+                    borderColor: getConfidenceColor(medicineConfidences[index]) + '40',
+                  }"
+                >
+                  置信度 {{ getConfidenceLabel(medicineConfidences[index]) }} ({{ (medicineConfidences[index] * 100).toFixed(0) }}%)
+                </span>
+                <el-tag
+                  v-if="medicine.medicineId"
+                  type="success"
+                  size="small"
+                  effect="light"
+                >
+                  已关联药品库
+                </el-tag>
+                <el-tag
+                  v-else-if="medicineConfidences[index] !== undefined && medicineConfidences[index] < 0.75"
+                  type="warning"
+                  size="small"
+                  effect="light"
+                >
+                  建议核对
+                </el-tag>
+              </div>
               <div class="prescription-form__medicine-actions">
                 <el-popover
                   placement="bottom"
@@ -682,6 +828,41 @@ const handleSubmit = async () => {
     }
   }
 
+  &__alert {
+    margin-bottom: 16px;
+
+    :deep(.el-alert__content) {
+      width: 100%;
+    }
+  }
+
+  &__alert-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  &__analysis {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  &__analysis-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--color-text-secondary);
+
+    .el-icon {
+      color: var(--color-primary);
+    }
+  }
+
   &__medicine-header {
     display: flex;
     justify-content: space-between;
@@ -691,10 +872,27 @@ const handleSubmit = async () => {
     border-bottom: 1px solid var(--color-border-light);
   }
 
+  &__medicine-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
   &__medicine-number {
     font-size: 15px;
     font-weight: 600;
     color: var(--color-primary);
+  }
+
+  &__confidence-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid;
   }
 
   &__medicine-actions {
