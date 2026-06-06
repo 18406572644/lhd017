@@ -2,7 +2,7 @@
 import { ref, watch, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import { Scan, Plus, Delete, Link, Unlink, Loading } from '@element-plus/icons-vue'
+import { Camera, Plus, Delete, Link, Close, Loading } from '@element-plus/icons-vue'
 import type {
   Prescription,
   PrescriptionCategory,
@@ -116,8 +116,18 @@ watch(
         medicines: props.prescription.medicines.length > 0
           ? [...props.prescription.medicines]
           : [emptyMedicine()],
-        doctor: { ...props.prescription.doctor },
-        hospital: { ...props.prescription.hospital },
+        doctor: {
+          name: props.prescription.doctor.name,
+          department: props.prescription.doctor.department,
+          title: props.prescription.doctor.title || '',
+          phone: props.prescription.doctor.phone || '',
+        },
+        hospital: {
+          name: props.prescription.hospital.name,
+          address: props.prescription.hospital.address || '',
+          phone: props.prescription.hospital.phone || '',
+          level: props.prescription.hospital.level || '',
+        },
         issueDate: props.prescription.issueDate,
         expiryDate: props.prescription.expiryDate,
         patientName: props.prescription.patientName,
@@ -311,7 +321,7 @@ const handleSubmit = async () => {
             <ImageUpload v-model="formData.image" :max-size-m-b="3" />
           </el-form-item>
           <el-form-item v-if="formData.image">
-            <el-button type="primary" :icon="Scan" :loading="isRecognizing" @click="handleOCRRecognize">
+            <el-button type="primary" :icon="Camera" :loading="isRecognizing" @click="handleOCRRecognize">
               {{ isRecognizing ? '识别中...' : 'OCR识别处方信息' }}
             </el-button>
             <span class="prescription-form__ocr-tip">
@@ -504,7 +514,7 @@ const handleSubmit = async () => {
                   v-else
                   size="small"
                   type="success"
-                  :icon="Unlink"
+                  :icon="Close"
                   @click="unlinkMedicine(index)"
                 >
                   已关联

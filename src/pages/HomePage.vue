@@ -16,9 +16,10 @@ import TagManager from '@/components/TagManager.vue'
 import ExportDialog from '@/components/ExportDialog.vue'
 import DisclaimerBanner from '@/components/DisclaimerBanner.vue'
 import Empty from '@/components/Empty.vue'
-import type { Medicine } from '@/types/medicine'
+import type { Medicine, ExportOptions } from '@/types/medicine'
 import { MEDICINE_CATEGORY_LABELS, EXPIRY_STATUS_INFO } from '@/types/medicine'
 import { calculateExpiryStatus } from '@/utils/date'
+import { exportMedicineData } from '@/utils/export'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const router = useRouter()
@@ -141,7 +142,7 @@ const handleSaveTag = (tag: any) => {
     updateTag(tag.id, tag)
     ElMessage.success('标签更新成功')
   } else {
-    addTag(tag)
+    addTag(tag.name, tag.color)
     ElMessage.success('标签添加成功')
   }
 }
@@ -149,6 +150,15 @@ const handleSaveTag = (tag: any) => {
 const handleDeleteTag = (id: string) => {
   deleteTag(id)
   ElMessage.success('标签删除成功')
+}
+
+const handleExport = (options: ExportOptions) => {
+  try {
+    exportMedicineData(medicineList.value, filteredMedicineList.value, options, tagList.value)
+    ElMessage.success('导出成功')
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '导出失败')
+  }
 }
 
 const navigateTo = (path: string) => {
@@ -367,9 +377,9 @@ const navigateTo = (path: string) => {
 
     <ExportDialog
       v-model:visible="showExportDialog"
-      :all-medicines="medicineList"
-      :filtered-medicines="filteredMedicineList"
-      :tags="tagList"
+      :all-count="medicineList.length"
+      :filtered-count="filteredMedicineList.length"
+      @export="handleExport"
     />
   </div>
 </template>
