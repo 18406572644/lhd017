@@ -2,7 +2,7 @@
 import { ref, watch, computed, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import { Camera, Plus, Delete, Link, Close, Loading, Check, Warning, Info } from '@element-plus/icons-vue'
+import { Camera, Plus, Delete, Link, Close, Loading, Check, Warning, InfoFilled } from '@element-plus/icons-vue'
 import type {
   Prescription,
   PrescriptionCategory,
@@ -412,7 +412,7 @@ const handleSubmit = async () => {
           >
             <div class="prescription-form__analysis">
               <div class="prescription-form__analysis-item">
-                <el-icon><Info /></el-icon>
+                <el-icon><InfoFilled /></el-icon>
                 <span>诊断：{{ recognitionInfo.diagnosis }}</span>
               </div>
               <div class="prescription-form__analysis-item">
